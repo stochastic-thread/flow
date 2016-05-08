@@ -1,4 +1,7 @@
 defmodule Flow do
+  use GenServer
+  alias Flow.Listener
+
   def start_link do
     url =   "ws.pusherapp.com"
     path = "/app/de504dc5763aeef9ff52?client=js&version=3.0&protocol=5"
@@ -44,29 +47,16 @@ defmodule Flow do
         {:text, data} ->
           assemble_payload(data)
           |> send_msg(socket)
-          start_loop(socket)
-        {:ping, _ping} -> IO.puts "..."
+          Flow.Listener.start_link(socket: socket)
       end
     end)
-  end
-
-  defp start_loop(s) do
-    pid = spawn(fn -> loop(s) end)
-  end
-
-  defp loop(s) do
-    case Socket.Web.recv!(s) do
-      {:text, txt} ->
-        IO.puts {Time.txt
-        loop(s)
-    end
   end
 
   def setup do
     Flow.start_link
     case Flow.run do
       :ok -> Flow.get_socket
-      _ -> IO.puts "working"
+      _ -> IO.puts "thinking..."
     end
   end
 
