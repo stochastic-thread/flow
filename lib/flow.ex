@@ -11,15 +11,27 @@ defmodule Flow do
     data["socket_id"]
   end
 
-  defp assemble_payload(data) do
-    socket_id = get_socket_id(JSX.decode!(data))
-    %{"data" => %{"socket_id" => socket_id, "channel" => "order_book"}, "event" => "pusher:subscribe"}
-    |> JSX.encode!
+  defp create_payload(socket_id) do
+    %{"socket_id" => socket_id,
+      "channel" => "order_book"}
   end
 
-  defp send_msg(msg, skt) do
-    skt |>
-    Socket.Web.send!({:text, msg})
+  defp encode_payload(payload) do
+    %{"data" => payload,
+      "event" => "pusher:subscribe"}
+      |> JSX.encode!
+  end
+
+  defp assemble_payload(data) do
+      data
+      |> JSX.decode!
+      |> get_socket_id
+      |> create_payload
+      |> encode_payload
+  end
+
+  defp send_msg(msg, socket) do
+    Socket.Web.send!(socket, {:text, msg})
   end
 
   def get_socket do
@@ -38,14 +50,14 @@ defmodule Flow do
     end)
   end
 
-  def start_loop(s) do
+  defp start_loop(s) do
     pid = spawn(fn -> loop(s) end)
   end
 
-  def loop(s) do
+  defp loop(s) do
     case Socket.Web.recv!(s) do
       {:text, txt} ->
-        IO.puts txt
+        IO.puts {Time.txt
         loop(s)
     end
   end
@@ -54,6 +66,7 @@ defmodule Flow do
     Flow.start_link
     case Flow.run do
       :ok -> Flow.get_socket
+      _ -> IO.puts "working"
     end
   end
 
