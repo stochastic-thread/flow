@@ -34,9 +34,12 @@ defmodule Flow.Listener do
   end
 
   defp decode_response(txt) do
+    IO.puts "HELP!\n"
+    IO.inspect txt
     case JSX.decode(txt) do
       {:ok, data} ->
-        IO.puts "\n"
+        IO.puts ":ok!"
+        IO.inspect data
         IO.inspect "you got to decode_response/1"
         IO.inspect data
         data
@@ -45,17 +48,25 @@ defmodule Flow.Listener do
         |> store_data(:os.system_time)
         |> IO.inspect
       {_else, idk} ->
+        IO.puts "????"
         IO.puts(idk)
     end
   end
 
+# # iex(103)>
+# 00:28:06.792 [error] Process #PID<0.293.0> raised an exception
+# ** (RuntimeError) protocol error
+#     lib/socket/web.ex:707: Socket.Web.recv!/2
+#     (flow) lib/flow/listener.ex:57: Flow.Listener.loop/1
+#
+# nil
   defp loop(s) do
-    case Socket.Web.recv!(s) do
+    case Socket.Web.recv!(s) do # this is Flow.Listener.loop/1 lib/flow/listener.ex:57 per above error msg
       {:text, txt} ->
         decode_response(txt)
         loop(s)
       {:ping, _ } ->
-          Flow.run(s)
+          Flow.setup
       {_else, idk} -> IO.inspect idk
     end
   end

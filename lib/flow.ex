@@ -2,6 +2,9 @@ defmodule Flow do
   use GenServer
   alias Flow.Listener
 
+  @doc """
+    subscribes to websocket endpoint, returning a socket
+  """
   def start_link do
     url =   "ws.pusherapp.com"
     path = "/app/de504dc5763aeef9ff52?client=js&version=3.0&protocol=5"
@@ -41,7 +44,6 @@ defmodule Flow do
       {:text, data} ->
         assemble_payload(data)
         |> send_msg(socket)
-      {_idk, idk} -> IO.inspect idk
     end
     socket
   end
