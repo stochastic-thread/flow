@@ -12,6 +12,7 @@ defmodule Flow do
   defp get_socket_id(data) do
     data = JSX.decode!(data["data"])
     data["socket_id"]
+    IO.puts "colle"
   end
 
   defp create_payload(socket_id) do
