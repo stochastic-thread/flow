@@ -36,6 +36,9 @@ defmodule Flow.Listener do
   defp decode_response(txt) do
     case JSX.decode(txt) do
       {:ok, data} ->
+        IO.puts "\n"
+        IO.inspect "you got to decode_response/1"
+        IO.inspect data
         data
         |> Map.get("data")
         |> JSX.decode!

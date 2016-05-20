@@ -6,8 +6,6 @@ defmodule Flow do
     url =   "ws.pusherapp.com"
     path = "/app/de504dc5763aeef9ff52?client=js&version=3.0&protocol=5"
     Socket.Web.connect!(url, path: path)
-    #
-    # Agent.start_link(fn() -> s end, name: __MODULE__)
   end
 
   defp get_socket_id(data) do
@@ -38,29 +36,21 @@ defmodule Flow do
     Socket.Web.send!(socket, {:text, msg})
   end
 
-  # def get_socket do
-  #   Agent.get(__MODULE__, fn x -> x end)
-  # end
-
   def run(socket) do
-    case socket |> Socket.Web.recv! do
+    case Socket.Web.recv!(socket) do
       {:text, data} ->
         assemble_payload(data)
         |> send_msg(socket)
-        Flow.Listener.start_link(socket: socket)
+      {_idk, idk} -> IO.inspect idk
     end
-
-    # Agent.get(__MODULE__, fn socket ->
-    #
-    # end)
+    socket
   end
 
   def setup do
-    socket = Flow.start_link
-    case Flow.run(socket) do
-      :ok -> Flow.get_socket
-      _ -> IO.puts "thinking..."
-    end
+    socket =
+      Flow.start_link
+      |> Flow.run
+    Flow.Listener.start_link(socket: socket)
   end
 
 end
