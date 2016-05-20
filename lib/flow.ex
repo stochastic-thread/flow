@@ -3,28 +3,52 @@ defmodule Flow do
   alias Flow.Listener
 
   @doc """
-    subscribes to websocket endpoint, returning a socket
+    starts the Flow process
   """
-  def start_link do
-    url =   "ws.pusherapp.com"
-    path = "/app/de504dc5763aeef9ff52?client=js&version=3.0&protocol=5"
-    Socket.Web.connect!(url, path: path)
+  def init do
+    Flow.start_link
+    Agent.get(__MODULE__, fn map ->
+      Flow.Listener.start_link(socket: Map.get(map, :socket))
+    end)
   end
 
+  def start_link do
+    # move url + path to config file
+    url =   "ws.pusherapp.com"
+    path = "/app/de504dc5763aeef9ff52?client=js&version=3.0&protocol=5"
+
+    # holds the Flow state, specifically a %Map{} with a single key, :socket
+    Agent.start(fn ->
+      Map.put(Map.new, :socket, Socket.Web.connect!(url, path: path))
+    end, name: __MODULE__)
+
+    # get the socket
+    Agent.get(__MODULE__, fn state ->
+      socket = Map.get(state, :socket)
+      # receive initial subscription message
+      case Socket.Web.recv!( socket ) do
+        {:text, response_payload} ->
+          response_payload
+          |> assemble_payload
+          |> send_msg(socket)
+      end
+    end)
+  end
+
+  # returns socket_id, needed in order to send events
   defp get_socket_id(data) do
-    data = JSX.decode!(data["data"])
-    data["socket_id"]
+    data
+    |> Map.get("data")
+    |> JSX.decode!
+    |> Map.get("socket_id")
   end
 
   defp create_payload(socket_id) do
-    %{"socket_id" => socket_id,
-      "channel" => "order_book"}
+    %{"socket_id" => socket_id, "channel" => "order_book"}
   end
 
   defp encode_payload(payload) do
-    %{"data" => payload,
-      "event" => "pusher:subscribe"}
-      |> JSX.encode!
+    JSX.encode!( %{"data" => payload, "event" => "pusher:subscribe"} )
   end
 
   defp assemble_payload(data) do
@@ -38,21 +62,4 @@ defmodule Flow do
   defp send_msg(msg, socket) do
     Socket.Web.send!(socket, {:text, msg})
   end
-
-  def run(socket) do
-    case Socket.Web.recv!(socket) do
-      {:text, data} ->
-        assemble_payload(data)
-        |> send_msg(socket)
-    end
-    socket
-  end
-
-  def setup do
-    socket =
-      Flow.start_link
-      |> Flow.run
-    Flow.Listener.start_link(socket: socket)
-  end
-
 end
