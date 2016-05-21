@@ -44,7 +44,7 @@ defmodule Flow do
   end
 
   defp create_payload(socket_id) do
-    %{"socket_id" => socket_id, "channel" => "order_book"}
+    %{"socket_id" => socket_id, "channel" => "diff_order_book"}
   end
 
   defp encode_payload(payload) do

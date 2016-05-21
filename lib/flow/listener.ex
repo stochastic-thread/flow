@@ -13,7 +13,9 @@ defmodule Flow.Listener do
   end
 
   defp convert(price, quantity) do
-    [ String.to_float( price ), String.to_float( quantity ) ]
+    {p, _} = Float.parse( price )
+    {q, _} = Float.parse( quantity )
+    [ p, q ]
   end
 
   defp get_and_convert(data, side) do
@@ -32,7 +34,7 @@ defmodule Flow.Listener do
 
       ts = Flow.Utilities.format_utc_timestamp( [newline?: false] )
 
-      url = ( "http://127.0.0.1:9200/bs/ts/" <> ts )
+      url = ( "http://127.0.0.1:9200/bs/diff_order_book/" <> ts )
 
       File.open("log_ts.txt", [:append], fn(file) ->
         IO.write(file, ts<>"\n")
