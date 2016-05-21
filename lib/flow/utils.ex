@@ -1,5 +1,5 @@
 defmodule Flow.Utilities do
-  def format_utc_timestamp(opts \\ []) do
+  def format_utc_timestamp(opts \\ [newline?: false]) do
     ts = {_, _, micro} = :os.timestamp()
     {{y, mo, d}, {h, mi, s}} = :calendar.now_to_local_time(ts)
     str = :erlang.element(mo, {"Jan","Feb","Mar","Apr","May","Jun","Jul", "Aug","Sep","Oct","Nov","Dec"})
@@ -8,9 +8,8 @@ defmodule Flow.Utilities do
       |> to_string
 
     case opts[:newline?] do
-      true -> str
+      true  -> str
       false -> String.strip(str)
-      _ -> String.strip(str)
     end
   end
 
