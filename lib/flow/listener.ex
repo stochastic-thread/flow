@@ -25,14 +25,19 @@ defmodule Flow.Listener do
     Enum.map(data[type], fn( [p, q] ) -> convert(p, q) end)
   end
 
-  defp store_data(data, time) do
+  defp store_data(data) do
     if valid?(data) do
       bids =  get_and_convert(data, :bids)
       asks =  get_and_convert(data, :asks)
-      url = "http://127.0.0.1:9200/bs/ob/"<>Integer.to_string(time)
-      File.open("log.txt", [:append], fn(file) -> 
-        IO.write(file, Integer.to_string(time)<>"\n")
+
+      ts = Flow.Utilities.format_utc_timestamp( [newline?: false] )
+
+      url = ( "http://127.0.0.1:9200/bs/ts/" <> ts )
+
+      File.open("log_ts.txt", [:append], fn(file) ->
+        IO.write(file, ts<>"\n")
       end)
+
       json = JSX.encode!(%{:bids => bids, :asks => asks})
       IO.puts("\n"<>url<>"\n")
       IO.inspect Tirexs.HTTP.post!(url, json)
@@ -51,7 +56,7 @@ defmodule Flow.Listener do
         data
         |> Map.get("data")
         |> JSX.decode!
-        |> store_data(:os.system_time)
+        |> store_data
         |> IO.inspect
       {:error, idk} ->
         IO.puts "~~ERROR~~"
