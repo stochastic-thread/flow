@@ -8,7 +8,8 @@ defmodule Flow.Listener do
   end
 
   defp valid?(data) do
-    (data["bids"] != nil) and (data["asks"] != nil)
+    # checking existence of "bids" and "asks" keys in Map
+    data["bids"] && data["asks"]
   end
 
   defp convert(price, quantity) do
@@ -29,9 +30,12 @@ defmodule Flow.Listener do
       bids =  get_and_convert(data, :bids)
       asks =  get_and_convert(data, :asks)
       url = "http://127.0.0.1:9200/bs/ob/"<>Integer.to_string(time)
+      File.open("log.txt", [:append], fn(file) -> 
+        IO.write(file, Integer.to_string(time)<>"\n")
+      end)
       json = JSX.encode!(%{:bids => bids, :asks => asks})
-      # IO.puts("\n"<>url<>"\n")
-      # IO.inspect Tirexs.HTTP.post!(url, json)
+      IO.puts("\n"<>url<>"\n")
+      IO.inspect Tirexs.HTTP.post!(url, json)
       %{:bids => bids, :asks => asks}
     end
   end
@@ -43,28 +47,22 @@ defmodule Flow.Listener do
         IO.inspect data
         IO.inspect "you got to decode_response/1"
         IO.inspect data
+
         data
         |> Map.get("data")
         |> JSX.decode!
         |> store_data(:os.system_time)
         |> IO.inspect
       {:error, idk} ->
-        IO.puts "ERROR~~"
+        IO.puts "~~ERROR~~"
         IO.inspect( idk )
     end
   end
 
-  # iex(103)>
-  # 00:28:06.792 [error] Process #PID<0.293.0> raised an exception
-  # ** (RuntimeError) protocol error
-  #     lib/socket/web.ex:707: Socket.Web.recv!/2
-  #     (flow) lib/flow/listener.ex:57: Flow.Listener.loop/1
-  #
-  # nil
   defp loop(s) do
     IO.inspect("Printing socket")
     IO.inspect(s)
-    case Socket.Web.recv!(s) do # this is Flow.Listener.loop/1 lib/flow/listener.ex:57 per above error msg
+    case Socket.Web.recv!(s) do
       {:text, txt} ->
         IO.inspect("Printing socket receive for (:text)")
         decode_response(txt)
