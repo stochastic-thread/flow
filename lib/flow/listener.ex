@@ -33,7 +33,7 @@ defmodule Flow.Listener do
       asks =  get_and_convert(data, :asks)
 
       ts = Flow.Utilities.format_utc_timestamp( [newline?: false] )
-      ts = String.replace(ts, " ", "0");
+      ts = String.replace(ts, " ", "");
       url = ( "http://127.0.0.1:9200/bitstamp/diff_order_book/" <> ts )
 
       File.open("log_ts.txt", [:append], fn(file) ->
