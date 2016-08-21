@@ -71,7 +71,7 @@ defmodule Flow.Listener do
     IO.inspect(s)
     case Socket.Web.recv!(s) do
       {:text, txt} ->
-        IO.inspect("Printing socket receive for (:text)")
+        IO.inspect("Printing socket receive for (:text):\n#{txt}")
         decode_response(txt)
         loop(s)
       {:ping, _ } ->
