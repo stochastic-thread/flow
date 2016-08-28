@@ -34,16 +34,23 @@ defmodule Flow.Listener do
 
       ts = Flow.Utilities.format_utc_timestamp( [newline?: false] )
       ts = String.replace(ts, " ", "");
-      url = ( "http://127.0.0.1:9200/bitstamp/diff_order_book/" <> ts )
-
-      File.open("log_ts.txt", [:append], fn(file) ->
-        IO.write(file, ts<>"\n")
+      elastic_ip = Application.get_env(:flow, :elastic_ip)
+      elastic_port = Application.get_env(:flow, :elastic_port)
+      index_name = Application.get_env(:flow, :index_name)
+      type_name = Application.get_env(:flow, :type_name)
+      elastic_info = elastic_ip <> ":" <> elastic_port
+      document_info = index_name <> "/" <> type_name <> "/" <> ts
+      url = "http://" <> elastic_info <> "/" <> document_info
+      logfile = Application.get_env(:flow, :log_name)
+      File.open(logfile, [:append], fn(file) ->
+        IO.write(file, ts <> "\n")
       end)
-
       json = JSX.encode!(%{:bids => bids, :asks => asks})
       IO.puts("\n"<>url<>"\n")
       IO.inspect Tirexs.HTTP.post!(url, json)
-      %{:bids => bids, :asks => asks}
+
+      %{ :bids => bids,
+         :asks => asks }
     end
   end
 
