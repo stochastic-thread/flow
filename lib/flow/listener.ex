@@ -54,6 +54,13 @@ defmodule Flow.Listener do
     end
   end
 
+  defp resubscribe_needed?(data) do
+    case Map.get(data, "code") do
+      4200 -> Flow.init
+      _ -> data
+    end
+  end
+
   defp decode_response(txt) do
     case JSX.decode(txt) do
       {:ok, data} ->
@@ -65,6 +72,7 @@ defmodule Flow.Listener do
         data
         |> Map.get("data")
         |> JSX.decode!
+        |> resubscribe_needed?
         |> store_data
         |> IO.inspect
       {:error, idk} ->
