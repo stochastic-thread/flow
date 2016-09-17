@@ -1,6 +1,7 @@
 defmodule Flow do
   use GenServer
   alias Flow.Listener
+  # import_config "config.exs"
 
   @doc """
     starts the Flow process
@@ -14,8 +15,8 @@ defmodule Flow do
 
   def start_link do
     # move url + path to config file
-    url =   "ws.pusherapp.com"
-    path = "/app/de504dc5763aeef9ff52?client=js&version=3.0&protocol=5"
+    url =   Application.get_env(:flow, :service_url)
+    path = Application.get_env(:flow, :path)
 
     # holds the Flow state, specifically a %Map{} with a single key, :socket
     Agent.start(fn ->
@@ -36,23 +37,26 @@ defmodule Flow do
   end
 
   # returns socket_id, needed in order to send events
-  defp get_socket_id(data) do
-    data
+  defp get_socket_id(package) do
+    package
     |> Map.get("data")
     |> JSX.decode!
     |> Map.get("socket_id")
   end
 
   defp create_payload(socket_id) do
-    %{"socket_id" => socket_id, "channel" => "diff_order_book"}
+    %{ "socket_id" => socket_id,
+       "channel"   => "diff_order_book" }
   end
 
   defp encode_payload(payload) do
-    JSX.encode!( %{"data" => payload, "event" => "pusher:subscribe"} )
+    %{ "data" => payload,
+       "event" => "pusher:subscribe" }
+    |> JSX.encode!
   end
 
-  defp assemble_payload(data) do
-      data
+  defp assemble_payload(package) do
+      package
       |> JSX.decode!
       |> get_socket_id
       |> create_payload
