@@ -67,9 +67,9 @@ defmodule Flow.Listener do
   #end
 
   def validate_field(data, field) do
-    IO.inspect data
-    case JSX.is_json? data do
-      true -> Map.get(data, field)
+    #IO.inspect data
+    case JSX.is_json? Map.get(data, field) do
+      true -> JSX.decode!(Map.get(data, field))
       false -> data
     end
   end
