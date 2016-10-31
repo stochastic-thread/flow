@@ -34,14 +34,14 @@ defmodule Flow.Listener do
 
       ts = Flow.Utilities.format_utc_timestamp( [newline?: false] )
       ts = String.replace(ts, " ", "");
-      elastic_ip = Application.get_env(:flow, :elastic_ip)
-      elastic_port = Application.get_env(:flow, :elastic_port)
-      index_name = Application.get_env(:flow, :index_name)
-      type_name = Application.get_env(:flow, :type_name)
-      elastic_info = elastic_ip <> ":" <> elastic_port
+      elastic_ip    = Application.get_env(:flow, :elastic_ip)
+      elastic_port  = Application.get_env(:flow, :elastic_port)
+      index_name    = Application.get_env(:flow, :index_name)
+      type_name     = Application.get_env(:flow, :type_name)
+      elastic_info  = elastic_ip <> ":" <> elastic_port
       document_info = index_name <> "/" <> type_name <> "/" <> ts
-      url = "http://" <> elastic_info <> "/" <> document_info
-      logfile = Application.get_env(:flow, :log_name)
+      url           = "http://" <> elastic_info <> "/" <> document_info
+      logfile       = Application.get_env(:flow, :log_name)
       File.open(logfile, [:append], fn(file) ->
         IO.write(file, ts <> "\n")
       end)
@@ -54,25 +54,31 @@ defmodule Flow.Listener do
     end
   end
 
-  defp resubscribe_needed?(data) do
-    case Map.get(data, "code") do
-      4200 -> Flow.init
-      _ -> data
+  #defp resubscribe_needed?(data) do
+   # IO.inspect data
+  #  case JSX.is_json?(data) do 
+  #    true -> Map.get(data, "data")
+  #    false ->
+  #      case Map.get(data, "code") do
+  #        4200 -> raise "oops"
+  #        _ -> data
+  #      end
+  #  end
+  #end
+
+  def validate_field(data, field) do
+    IO.inspect data
+    case JSX.is_json? data do
+      true -> Map.get(data, field)
+      false -> data
     end
   end
 
   defp decode_response(txt) do
     case JSX.decode(txt) do
       {:ok, data} ->
-        IO.puts ":ok!"
-        IO.inspect data
-        IO.inspect "you got to decode_response/1"
-        IO.inspect data
-
         data
-        |> Map.get("data")
-        |> JSX.decode!
-        |> resubscribe_needed?
+        |> validate_field("data")
         |> store_data
         |> IO.inspect
       {:error, idk} ->
