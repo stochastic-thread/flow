@@ -46,8 +46,8 @@ defmodule Flow.Listener do
         IO.write(file, ts <> "\n")
       end)
       json = JSX.encode!(%{:bids => bids, :asks => asks})
-      IO.puts("\n"<>url<>"\n")
-      IO.inspect Tirexs.HTTP.post!(url, json)
+      IO.puts("\n" <> url <> "\n")
+      IO.inspect(Tirexs.HTTP.post!(url, json))
 
       %{ :bids => bids,
          :asks => asks }
@@ -67,10 +67,14 @@ defmodule Flow.Listener do
   #end
 
   def validate_field(data, field) do
-    #IO.inspect data
+    IO.inspect data
     case JSX.is_json? Map.get(data, field) do
       true -> JSX.decode!(Map.get(data, field))
-      false -> data
+      false ->
+        case Map.get(data, "code") do
+          4200 -> raise "dead"
+          _ -> IO.inspect data
+        end
     end
   end
 
