@@ -54,18 +54,6 @@ defmodule Flow.Listener do
     end
   end
 
-  #defp resubscribe_needed?(data) do
-   # IO.inspect data
-  #  case JSX.is_json?(data) do 
-  #    true -> Map.get(data, "data")
-  #    false ->
-  #      case Map.get(data, "code") do
-  #        4200 -> raise "oops"
-  #        _ -> data
-  #      end
-  #  end
-  #end
-
   def validate_field(data, field) do
     IO.inspect data
     case JSX.is_json? Map.get(data, field) do
@@ -73,7 +61,9 @@ defmodule Flow.Listener do
       false ->
         case Map.get(data, "code") do
           4200 -> raise "dead"
-          _ -> IO.inspect data
+          _ ->
+            IO.inspect data
+            spawn(fn -> Flow.init end)
         end
     end
   end

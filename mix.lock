@@ -8,5 +8,5 @@
   "mimerl": {:hex, :mimerl, "1.0.2", "993f9b0e084083405ed8252b99460c4f0563e41729ab42d9074fd5e52439be88", [:rebar3], []},
   "poison": {:hex, :poison, "2.1.0", "f583218ced822675e484648fa26c933d621373f01c6c76bd00005d7bd4b82e27", [:mix], []},
   "socket": {:git, "https://github.com/meh/elixir-socket.git", "ada5632ab0f17ccadcd1cdef2dd77d61c97c9a4a", []},
-  "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0", "edee20847c42e379bf91261db474ffbe373f8acb56e9079acb6038d4e0bf414f", [:rebar, :make], []},
+  "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0", "edee20847c42e379bf91261db474ffbe373f8acb56e9079acb6038d4e0bf414f", [:make, :rebar], []},
   "tirexs": {:hex, :tirexs, "0.8.0", "3750a511e97791344a1875941f6e5c6d60a3df57c82b5a8b3cd976eb5a61c55c", [:mix], [{:exjsx, "~> 3.2.0", [hex: :exjsx, optional: false]}]}}
