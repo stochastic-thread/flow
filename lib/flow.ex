@@ -27,7 +27,10 @@ defmodule Flow do
     Agent.get(__MODULE__, fn state ->
       socket = Map.get(state, :socket)
       # receive initial subscription message
-      case Socket.Web.recv!( socket ) do
+      response = Socket.Web.recv!(socket)
+      IO.puts "Inspecting response..."
+      IO.inspect response
+      case response do
         {:text, response_payload} ->
           response_payload
           |> assemble_payload
