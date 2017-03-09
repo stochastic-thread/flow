@@ -78,9 +78,11 @@ defmodule Flow.Listener do
         |> validate_field("data")
         |> store_data
         |> IO.inspect
+        :ok
       {:error, idk} ->
-        IO.puts "~~ERROR~~"
-        IO.inspect( idk )
+        IO.inspect "error occurred!"
+        IO.inspect idk
+        :err
     end
   end
 
@@ -90,8 +92,10 @@ defmodule Flow.Listener do
     case Socket.Web.recv!(s) do
       {:text, txt} ->
         IO.inspect("Printing socket receive for (:text):\n#{txt}")
-        decode_response(txt)
-        loop(s)
+        case decode_response(txt) do
+          :ok -> loop(s)
+          :err -> raise "kill self"
+        end
       {:ping, _ } ->
         s |> Socket.Web.send!({:pong, ""})
         loop(s)
